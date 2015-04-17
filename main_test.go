@@ -1,6 +1,7 @@
 package main_test
 
 import (
+    "strings"
     "strconv"
     "math"
     "os/exec"
@@ -24,12 +25,13 @@ var _ = Describe("CLI", func() {
     })
 
     It("calculates π", func() {
-        command := exec.Command(pathToCLI, "pi", "-n", "1000:0")
+        command := exec.Command(pathToCLI, "pi", "-n", "100000")
         session, err := gexec.Start(command, GinkgoWriter, GinkgoWriter)
         Ω(err).ShouldNot(HaveOccurred())
 
-        resultStr := session.Wait().Buffer().Contents()
-        result, err := strconv.Atoi(string(resultStr))
+        resultBytes := session.Wait().Out.Contents()
+        resultStr := strings.TrimSpace(string(resultBytes))
+        result, err := strconv.ParseFloat(resultStr, 64)
         Ω(err).ShouldNot(HaveOccurred())
         Ω(result).Should(BeNumerically("~", math.Pi, 0.0001))
     })
